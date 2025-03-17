@@ -1,16 +1,21 @@
 #include <array>
+#include <vector>
 #include <utility>
 #include <iostream>
 #include <cassert>
+#include <initializer_list>
 
 template<typename T, size_t N, size_t Size>
 constexpr size_t hash0(T t) {
     return (t^N) % Size;
 }
 
+template<typename Container, typename T>
+concept container = std::same_as<typename Container::value_type, T>;
+
 template<class T, class U, size_t Size, size_t MaxSize=Size*2, size_t N = 0, size_t MaxN = 100>
 struct select_parameter {
-    static constexpr std::pair<size_t,size_t> select(std::initializer_list<std::pair<T, U>> map) {
+    static constexpr std::pair<size_t,size_t> select(container<std::pair<T, U>> auto map) {
         if (MaxN == N) {
             assert(0);
         }
@@ -29,21 +34,22 @@ struct select_parameter {
 };
 template<class T, class U, size_t Size, size_t MaxSize, size_t MaxN>
 struct select_parameter<T, U, Size, MaxSize, MaxN, MaxN> {
-    static constexpr std::pair<size_t, size_t> select(std::initializer_list<std::pair<T, U>> map) {
+    static constexpr std::pair<size_t, size_t> select(container<std::pair<T, U>> auto map) {
         return select_parameter<T, U, Size + 1, MaxSize, 0, MaxN>::select(map);
     }
 };
 template<class T, class U, size_t Size, size_t N>
 struct select_parameter<T, U, Size, Size, N, N> {
-    static constexpr std::pair<size_t, size_t> select(std::initializer_list<std::pair<T, U>> map) {
+    static constexpr std::pair<size_t, size_t> select(container<std::pair<T, U>> auto map) {
         assert(0);
+        return {};
     }
 };
 
 template<class T, class U, size_t Size, size_t N>
 class const_map {
 public:
-    consteval const_map(std::initializer_list<std::pair<T,U>> map) : m_values{} {
+    consteval const_map(container<std::pair<T,U>> auto map) : m_values{} {
         std::array<bool, Size> used_indices{};
         for (auto [x, y] : map) {
             auto value_index = hash0<T, N, Size>(x);
@@ -61,12 +67,12 @@ private:
 
 
 int main() {
-    constexpr auto init = std::initializer_list<std::pair<int,int>>{
-        { 1,2 },
-        { 3, 4 },
-        { 7, 1 },
-        { 10, 0 },
-        { 110, 2 },
+    constexpr auto init = std::array{
+        std::pair{ 1,2 },
+        std::pair{ 3, 4 },
+        std::pair{ 7, 1 },
+        std::pair{ 10, 0 },
+        std::pair{ 110, 2 },
     };
     constexpr auto parameters = select_parameter<int, int, 5>::select(
         init
