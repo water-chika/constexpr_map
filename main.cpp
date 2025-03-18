@@ -1,4 +1,5 @@
 #include "constexpr_map.hpp"
+#include <iostream>
 
 using constexpr_map::const_map;
 using constexpr_map::select_parameter;

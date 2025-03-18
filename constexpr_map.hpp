@@ -1,13 +1,11 @@
 #pragma once
 
 #include <array>
-#include <vector>
-#include <utility>
-#include <iostream>
 #include <cassert>
-#include <initializer_list>
 
 namespace constexpr_map {
+
+using std::size_t;
 
 template<typename T, size_t N, size_t Size>
 constexpr size_t hash0(T t) {
