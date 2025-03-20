@@ -1,35 +1,21 @@
 #include "constexpr_map.hpp"
 #include <iostream>
 
-using constexpr_map::const_map;
-using constexpr_map::select_parameter;
-
-template<typename T, T init>
-constexpr auto get_map() {
-    constexpr auto parameters = select_parameter<int, int, init.size()>::select(
-            init
-        );
-    constexpr auto Size = parameters.first;
-    constexpr auto N = parameters.second;
-    constexpr auto map = const_map<int, int, Size, N>{
-        init
-    };
-    return map;
-}
+using constexpr_map::construct_const_map;
 
 int main() {
-    constexpr auto init = std::array{
-        std::pair{ 1,2 },
-        std::pair{ 3, 4 },
-        std::pair{ 7, 1 },
-        std::pair{ 10, 0 },
-        std::pair{ 110, 2 },
-        std::pair{ 32, 5},
-        std::pair{ 72, 36},
-        std::pair{ 100000, 5},
-        std::pair{ 100001, 6},
-    };
-    auto map = get_map<typeof(init),init>();
+    constexpr auto init = std::to_array<std::pair<int,int>>({
+        { 1,2 },
+        { 3, 4 },
+        { 7, 1 },
+        { 10, 0 },
+        { 110, 2 },
+        { 32, 5},
+        { 72, 36},
+        { 100000, 5},
+        { 100001, 6},
+    });
+    auto map = construct_const_map < init, decltype([](auto d) { return d.first; }) >();
 
     std::cout << "map's count: " << init.size() << std::endl;
     std::cout << "map's value size: " << sizeof(init[0].second) << std::endl;
@@ -37,6 +23,6 @@ int main() {
 
     int x{};
     std::cin >> x;
-    std::cout << map[x];
+    std::cout << map[x].second;
     return 0;
 }
