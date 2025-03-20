@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cassert>
+#include <algorithm>
 
 namespace constexpr_map {
 
@@ -67,4 +68,45 @@ private:
     std::array<U, Size> m_values;
 };
 
+template<typename T, T init>
+constexpr auto get_map() {
+    constexpr auto parameters = select_parameter<decltype(init[0].first), decltype(init[0].second), init.size()>::select(
+        init
+    );
+    constexpr auto Size = parameters.first;
+    constexpr auto N = parameters.second;
+    constexpr auto map = const_map<decltype(init[0].first), decltype(init[0].second), Size, N>{
+        init
+    };
+    return map;
+}
+
+
+constexpr auto get_from(auto data, auto get_key) {
+    std::array<std::pair<decltype(get_key(data[0])), std::remove_cvref_t<decltype(data[0])>>, data.size()> map{};
+    for (int i = 0; i < map.size(); i++) {
+        map[i] = { get_key(data[i]), data[i] };
+    }
+    return map;
+}
+
+template<auto Data, typename GetKey>
+constexpr auto construct_const_map() {
+    constexpr auto map = get_from(Data, GetKey{});
+    return constexpr_map::get_map<decltype(map), map>();
+}
+
+constexpr auto unique_map(auto data, auto get_key) {
+    std::sort(data.begin(), data.end(), [&get_key](auto l, auto r) { return get_key(l) < get_key(r); });
+    auto last = std::unique(data.begin(), data.end(), [&get_key](auto l, auto r) { return get_key(l) == get_key(r); });
+    return std::pair{ data, last - data.begin() };
+}
+template<auto Init>
+constexpr auto construct_unique_map() {
+    constexpr auto data = Init.first;
+    constexpr auto size = Init.second;
+    std::array<std::remove_cvref_t<decltype(data[0])>, size> res{};
+    std::copy(data.begin(), data.begin() + size, res.begin());
+    return res;
+}
 } // namespace constexpr_map
