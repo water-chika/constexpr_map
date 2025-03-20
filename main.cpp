@@ -23,6 +23,12 @@ int main() {
 
     int x{};
     std::cin >> x;
-    std::cout << map[x].second;
+    auto pair = map[x];
+    if (pair.first == x) {
+        std::cout << map[x].second;
+    }
+    else {
+        std::cout << "The map does not contains key:" << x << std::endl;
+    }
     return 0;
 }
