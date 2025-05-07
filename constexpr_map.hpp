@@ -16,7 +16,7 @@ constexpr size_t hash0(T t) {
 template<typename Container, typename T>
 concept container = std::same_as<typename Container::value_type, T>;
 
-template<class T, class U, size_t Size, size_t MaxSize=Size*2, size_t N = 0, size_t MaxN = 100>
+template<class T, class U, size_t Size, size_t MaxSize=Size*2, size_t N = 0, size_t MaxN = 2>
 struct select_parameter {
     static constexpr std::pair<size_t,size_t> select(container<std::pair<T, U>> auto map) {
         if (MaxN == N) {
