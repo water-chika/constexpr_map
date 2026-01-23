@@ -3,14 +3,21 @@
 #include <array>
 #include <cassert>
 #include <algorithm>
+#include <type_traits>
 
 namespace constexpr_map {
 
 using std::size_t;
 
 template<typename T, size_t N, size_t Size>
+    requires std::integral<T>
 constexpr size_t hash0(T t) {
     return (t^N) % Size;
+}
+template<typename T, size_t N, size_t Size>
+    requires (std::is_enum_v<T>)
+constexpr size_t hash0(T t) {
+    return (static_cast<std::underlying_type_t<T>>(t)^N) % Size;
 }
 
 template<typename Container, typename T>
