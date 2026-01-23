@@ -116,4 +116,11 @@ constexpr auto construct_unique_map() {
     std::copy(data.begin(), data.begin() + size, res.begin());
     return res;
 }
+
+template<auto Data>
+constexpr auto construct_const_set() {
+    constexpr auto map = get_from(Data, [](auto t) {return t;});
+    return constexpr_map::get_map<decltype(map), map>();
+}
+
 } // namespace constexpr_map
